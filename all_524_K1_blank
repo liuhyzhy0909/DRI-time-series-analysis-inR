@@ -1,0 +1,488 @@
+rm(list=ls(all=TRUE)) 
+require(zoo)
+options("digits.secs"=2) 
+Sys.setenv(TZ = "GMT")
+#
+fix.co2bg <- function(df) {
+clean <- data.frame(as.numeric(df$V4))
+time <- df$V1
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+z <- zoo(clean,time)
+temp.z <- aggregate(z, index(z), mean)
+m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+ma <- na.approx(m)
+names(ma)<-"co2bg"
+write.zoo(ma, file="co2bg_z.csv", sep=",")
+}
+#
+fix.co2dil <- function(df) {
+clean <- data.frame(as.numeric(df$V4))
+time <- df$V1
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+z <- zoo(clean,time)
+temp.z <- aggregate(z, index(z), mean)
+m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+ma <- na.approx(m)
+names(ma)<-"co2dil"
+write.zoo(ma, file="co2dil_z.csv", sep=",")
+}
+#
+fix.co2tpi <- function(df) {
+clean <- data.frame(as.numeric(df$V4))
+time <- df$V1
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+z <- zoo(clean,time)
+temp.z <- aggregate(z, index(z), mean)
+m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+ma <- na.approx(m)
+names(ma)<-"co2tpi"
+write.zoo(ma, file="co2tpi_z.csv", sep=",")
+}
+#
+fix.cpc <- function(df) {
+clean <- data.frame(as.numeric(df$V2))
+time <- df$V1
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+z <- zoo(clean,time)
+temp.z <- aggregate(z, index(z), mean)
+m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+ma <- na.approx(m)
+names(ma)<-"cpc"
+write.zoo(ma, file="cpc_z.csv", sep=",")
+}
+#
+fix.hnu <- function(df) {
+clean <- data.frame(as.numeric(df$V2))
+time <- df$V1
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+z <- zoo(clean,time)
+temp.z <- aggregate(z, index(z), mean)
+m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+ma <- na.approx(m)
+names(ma)<-"hnu"
+write.zoo(ma, file="hnu_z.csv", sep=",")
+}
+#
+#
+fix.testo <- function(df) {
+clean <- data.frame(df$V2,df$V3,df$V4,df$V5,df$V6,df$V7,df$V8,df$V9,df$V10,df$V13,df$V14)
+clean <- sapply(clean[, c(1:ncol(clean))], as.numeric)
+time <- as.POSIXct(df$V1, format='%m/%d/%Y%T')
+z <- zoo(clean,time)
+#temp.z <- aggregate(z, index(z), mean) 
+#m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+# un-comment the above if this erros out. 
+m <- merge(z, zoo(,seq(start(z),end(z),"sec")),all=TRUE)
+colnames(m)<-c("NOppm","O2","CO2i","COppm","NO2ppm","SO2ppm","Tf","Ta","pump","pabs","CO2")
+za <- na.approx(m)
+###
+#make separate instruments
+###
+testo.NO <- merge(za$NOppm,za$NO2ppm)
+colnames(testo.NO)<-c("testo.NOppm","testo.NO2ppm")
+write.zoo(testo.NO, file="testoNO_z.csv", sep=",")
+#
+testo.CO2 <- merge(za$CO2i,za$CO2)
+colnames(testo.CO2)<-c("testo.CO2i","testo.CO2")
+write.zoo(testo.CO2, file="testoCO2_z.csv", sep=",")
+#
+testo.COppm <- za$COppm
+names(testo.COppm)<-"testo.COppm"
+write.zoo(testo.COppm, file="testoCO_z.csv", sep=",")
+#
+testo.etc <- merge(za$O2, za$SO2ppm, za$Ta, za$Tf, za$pump, za$pabs)
+names(testo.etc)<-c("testo.O2","testo.SO2ppm","testo.Ta","testo.Tf","testo.pump","testo.pabs")
+write.zoo(testo.etc, file="testoEtc_z.csv", sep=",")
+}
+#
+fix.ae51 <- function(df) {
+good.rows <- ifelse(as.character(df$V1)==as.character(df[1,]$V1), TRUE, FALSE)
+length(which(!good.rows))
+df <- df[good.rows, ]
+time <- paste(df$V1,df$V2)
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+clean <- data.frame(as.numeric(df$V3))
+z <- zoo(clean,time)
+m <- merge(z, zoo(,seq(start(z),end(z),"sec")),all=TRUE)
+ma <- na.approx(m)
+colnames(ma) <- "ae51"
+write.zoo(ma, file="ae51_z.csv", sep=",")
+}
+#
+fix.ae52 <- function(df) {
+good.rows <- ifelse(as.character(df$V1)==as.character(df[1,]$V1), TRUE, FALSE)
+length(which(!good.rows))
+df <- df[good.rows, ]
+time <- paste(df$V1,df$V2)
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+clean <- data.frame(df$V3,df$V4)
+clean <- sapply(clean[, c(1:ncol(clean))], as.numeric)
+z <- zoo(clean,time)
+m <- merge(z, zoo(,seq(start(z),end(z),"sec")),all=TRUE)
+ma <- na.approx(m)
+colnames(ma) <- c("ae52.bc","ae52.uvpm")
+write.zoo(ma, file="ae52_z.csv", sep=",")
+}
+#
+fix.gps <- function(df) {
+good.rows <- ifelse(as.character(df$V4)=="A" & as.character(df$V26)=="M", TRUE, FALSE)
+length(which(!good.rows))
+df <- df[good.rows, ]
+time <- paste(df$V1,df$V2)
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+clean <- data.frame(df$V5,df$V7,df$V9,df$V23)
+clean <- sapply(clean[, c(1:ncol(clean))], as.numeric)
+z <- zoo(clean,time)
+temp.z <- aggregate(z, index(z), mean)
+m <- merge(temp.z, zoo(,seq(start(temp.z),end(temp.z),"sec")),all=TRUE)
+ma <- na.approx(m)
+colnames(ma)<-c("latitude","longitude","velocity","height")
+write.zoo(ma, file="gps_z.csv", sep=",")
+}
+#
+fix.gps2 <- function(df) {
+good.rows <- ifelse(as.character(df$V14)=="M", TRUE, FALSE)
+length(which(!good.rows))
+df <- df[good.rows, ]
+head(df)
+time <- paste(df$V1,df$V2)
+time <- as.POSIXct(time, format="%m/%d/%Y%T")
+clean <- data.frame(df$V4,df$V6,df$V9,df$V11)
+#clean <- sapply(clean[, c(1:ncol(clean))], as.numeric)
+z <- zoo(clean,time)
+m <- merge(z, zoo(,seq(start(z),end(z),"sec")),all=TRUE)
+za <- na.approx(m)
+colnames(za)<-c("latitude","longitude","velocity","height")
+write.zoo(za, file="gps_z.csv", sep=",")
+}
+#
+#
+#correct order: z <- merge(co2bg, co2dil,co2tpi,cpc,ae51,ae52,hnu,drx,testo,langan,gps,engine)
+main <- function(a,b,c,d,e,f,g,h,i) {
+## CO2_BG ###
+ar <- fix.co2bg(a)
+br <- fix.co2dil(b)
+cr <- fix.co2tpi(c)
+dr <- fix.cpc(d)
+er <- fix.hnu(e)
+fr <- fix.testo(f)
+ir <- fix.gps(i)
+gr <- fix.ae51(g)
+hr <- fix.ae52(h)
+}
+#
+#
+main3 <- function(a,b,c,d,e,f,h,i) {
+## CO2_BG ###
+ar <- fix.co2bg(a)
+br <- fix.co2dil(b)
+cr <- fix.co2tpi(c)
+dr <- fix.cpc(d)
+er <- fix.hnu(e)
+fr <- fix.testo(f)
+ir <- fix.gps(i)
+hr <- fix.ae52(h)
+}
+#
+main2 <- function(a,b,c,d,e,f,i) {
+## CO2_BG ###
+ar <- fix.co2bg(a)
+br <- fix.co2dil(b)
+cr <- fix.co2tpi(c)
+dr <- fix.cpc(d)
+er <- fix.hnu(e)
+fr <- fix.testo(f)
+ir <- fix.gps(i)
+}
+#
+main4 <- function(a,b,c,d,e,f,g,h,i) {
+## CO2_BG ###
+ar <- fix.co2bg(a)
+br <- fix.co2dil(b)
+cr <- fix.co2tpi(c)
+dr <- fix.cpc(d)
+er <- fix.hnu(e)
+fr <- fix.testo(f)
+ir <- fix.gps2(i)
+gr <- fix.ae51(g)
+hr <- fix.ae52(h)
+}
+#
+# K1 524 run2
+setwd("/home/will/Dropbox/heavy_hauler/Data/130524_K1/130524_Kamatsu_Run2")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130524_K1/130524_Kamatsu_Run2")
+a <- read.table("20130524170215_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130524170215_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130524170215_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130524170215_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130524170215_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130524170215_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130524-164900.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130524170215_GPS.txt",skip=3,fill=T)
+main3(a,b,c,d,e,f,h,i) 
+##
+# C2
+setwd("/home/will/Dropbox/heavy_hauler/Data/130528_C2/130528_CATC2_Run1")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130528_C2/130528_CATC2_Run1")
+a <- read.table("20130528123610_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130528123610_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130528123610_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130528123610_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130528123610_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130528123610_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130528-115700.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130528-115640.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130528123610_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130528_C2/130528_CATC2_Run2")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130528_C2/130528_CATC2_Run2")
+a <- read.table("20130528142757_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130528142757_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130528142757_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130528142757_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130528142757_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130528142757_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130528142757_GPS.txt",skip=3,fill=T)
+main2(a,b,c,d,e,f,i) 
+##
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130528_C2/130528_CATC2_Run3")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130528_C2/130528_CATC2_Run3")
+a <- read.table("20130528161043_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130528161043_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130528161043_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130528161043_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130528161043_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130528161043_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130528161043_GPS.txt",skip=3,fill=T)
+main2(a,b,c,d,e,f,i)
+# L2 run1
+setwd("/home/will/Dropbox/heavy_hauler/Data/130530_L2/130530_L2_Run1")	
+a <- read.table("20130530134916_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130530134916_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130530134916_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130530134916_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130530134916_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130530134916_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130530-134630.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130530134916_GPS.txt",skip=3,fill=T)
+main3(a,b,c,d,e,f,h,i) 
+#
+setwd("/home/will/Dropbox/heavy_hauler/Data/130530_L2/130530_L2_Run2")	
+a <- read.table("20130530152222_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130530152222_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130530152222_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130530152222_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130530152222_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130530152222_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130530-151900.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130530-151840.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130530152222_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+#
+setwd("/home/will/Dropbox/heavy_hauler/Data/130530_L2/130530_L2_Run3")	
+a <- read.table("20130530170618_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130530170618_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130530170618_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130530170618_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130530170618_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130530170618_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130530170618_GPS.txt",skip=3,fill=T)
+main2(a,b,c,d,e,f,i) 
+#
+setwd("/home/will/Dropbox/heavy_hauler/Data/130530_L2/130530_L2_Blank")	
+a <- read.table("20130530112434_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130530112434_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130530112434_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130530112434_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130530112434_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130530112434_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130530-111301.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130530-095830.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130530112434_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+#
+#C1 run 1 May 27
+setwd("/home/will/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Run1")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Run1")
+a <- read.table("20130527135330_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130527135330_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130527135330_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130527135330_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130527135330_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130527135330_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130527-135000.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130527-135000.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130527135330_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i)
+##
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Run2")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Run2")
+a <- read.table("20130527160551_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130527160551_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130527160551_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130527160551_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130527160551_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130527160551_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130527-160400.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130527-160420.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130527160551_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i)
+##
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Run3")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Run3")
+a <- read.table("20130527174854_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130527174854_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130527174854_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130527174854_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130527174854_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130527174854_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130527-174300.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130527-174230.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130527174854_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i)
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Blank")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C1/130527_CATC1_Blank")
+a <- read.table("20130527120946_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130527120946_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130527120946_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130527120946_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130527120946_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130527120946_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130527-114100.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130527-114040.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130527120946_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i)
+#
+#K2 run 1
+setwd("/home/will/Dropbox/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run1")
+#setwd("C:/users/asus/Dropbox/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run1")
+a <- read.table("20130526103902_CO2_BG.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130526103902_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130526103902_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130526103902_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130526103902_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130526103902_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130526-093801.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130526-093810.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130526103902_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+#K2 run 2
+setwd("/home/will/Dropbox/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run2")
+#setwd("C:/users/asus/Dropbox/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run2")
+a <- read.table("20130526124241_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130526124241_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130526124241_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130526124241_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130526124241_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130526124241_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130526-124000.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130526-124000.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130526124241_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+#K2 run 3
+setwd("/home/will/Dropbox/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run3")
+#setwd("C:/users/asus/Dropbox/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run3")
+a <- read.table("20130526143036_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130526143036_CO2_Dil.txt", skip=4, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130526143036_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130526143036_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130526143036_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130526143036_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130526-142200.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130526-142020.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130526143036_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i)
+#
+#K1 run 1
+setwd("/home/will/Dropbox/heavy_hauler/Data/130603_K1/130603_Kamatsu_K1_Run1")
+#setwd("C:/users/asus/Dropbox/heavy_hauler/Data/130603_K1/130603_Kamatsu_K1_Run1")
+a <- read.table("20130603102646_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130603102646_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130603102646_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130603102646_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130603102646_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130603102646_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130603-100001.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130603-095930.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130603102646_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+#K1 run 2
+setwd("/home/will/Dropbox/heavy_hauler/Data/130603_K1/130603_Kamatsu_K1_Run2")
+#setwd("C:/users/asus/Dropbox/heavy_hauler/Data/130603_K1/130603_Kamatsu_K1_Run2")
+a <- read.table("20130603122346_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130603122346_CO2_Dil.txt", skip=4, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130603122346_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130603122346_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130603122346_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130603122346_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130603-122200.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130603-121940.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130603122346_GPS.txt",skip=21,fill=T)
+main(a,b,c,d,e,f,g,h,i)
+#
+#L1 run 1 May 27
+setwd("/home/will/Dropbox/heavy_hauler/Data/130531_L1/130531_L1_Run1")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130531_L1/130531_L1_Run1")
+a <- read.table("20130531114501_CO2_BG.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130531114501_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130531114501_CO2_TPi.txt", skip=4, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130531114501_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130531114501_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130531114501_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130531-113801.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130531-113810.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130531114501_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130531_L1/130531_L1_Run2")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C2/130527_CATC1_Run2")
+a <- read.table("20130531131230_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130531131230_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130531131230_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130531131230_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130531131230_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130531131230_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130531-130800.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130531-130900.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130531131230_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+#L1 run 1 May 27
+setwd("/home/will/Dropbox/heavy_hauler/Data/130602_L1/130602_L1_Run1")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C2/130527_CATC1_Run1")
+a <- read.table("20130602092645_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130602092645_CO2_Dil.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130602092645_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130602092645_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130602092645_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130602092645_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130602-092401.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130602-092330.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+#fix GPS for L1 june 2 run1
+i <- read.table("20130602092645_GPS.txt",skip=3,fill=T)
+main4(a,b,c,d,e,f,g,h,i) 
+##
+##
+setwd("/home/will/Dropbox/heavy_hauler/Data/130602_L1/130602_L1_Run2")
+#setwd("C:/Users/asus/Dropbox/heavy_hauler/Data/130527_C2/130527_CATC1_Run2")
+a <- read.table("20130602110240_CO2_BG.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+b <- read.table("20130602110240_CO2_Dil.txt", skip=3, fill=T, sep=",", stringsAsFactors = FALSE)
+c <- read.table("20130602110240_CO2_TPi.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+d <- read.table("20130602110240_CPC.txt", skip=2, fill=T, sep=",", stringsAsFactors = FALSE)
+e <- read.table("20130602110240_HNU.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+f <- read.table("20130602110240_Testo350.txt", skip=2, sep=",", stringsAsFactors = FALSE)
+g <- read.table("AE51-S2-135_20130602-110100.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+h <- read.table("AE52-S4-565_20130602-105920.csv", skip=1, fill=T, sep=",", stringsAsFactors = FALSE)
+i <- read.table("20130602110240_GPS.txt",skip=3,fill=T)
+main(a,b,c,d,e,f,g,h,i) 
+##
+
