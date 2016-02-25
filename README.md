@@ -11,11 +11,17 @@ readme edited Feb 2016
 
 Table of Contents 
 Chapter 1 - Engine Data
+
 Section A - Caterpillar Engine Data 
+
 Section B - Liebherr Engine  Data
+
 Section C - Komatsu Engine Data
+
 Chapter 2 - DRX Data 
+
 Chapter 3 - All Other Sensors 
+
 Chapter 4 - Cross Correlation Function 
 
 Zoo documation: http://cran.r-project.org/web/packages/zoo/vignettes/zoo-quickref.pdf
