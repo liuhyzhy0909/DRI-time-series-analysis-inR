@@ -6,7 +6,8 @@ time series interpolation and cross correlation analysis
 
 User guide for heavy hauler emissions project using R code for TS analysis
 by Will Rudebusch 
-updated March 2014
+R code finished March 2014
+readme edited Feb 2016
 
 Table of Contents 
 Chapter 1 - Engine Data
@@ -101,22 +102,22 @@ outputs raw engine data data and an interpolated time series (zoo object).
 note: the user must enter the start and stop times of each run that is in the engine data. 
 see below for an example.
 
-## Example R code 1-C
-#set the working directory to where the engine data csv file lives.
+Example R code 1-C
+Set the working directory to where the engine data csv file lives.
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130526_K2/130526_KamatsuK2_Run1")
 
-# read in the csv file, you have to change this every time, don't worry about the other stuff. 
+Read in the csv file, you have to change this every time, don't worry about the other stuff. 
 df <- read.table("K2_engine_run1.csv", skip=1, fill=T, stringsAsFactors=F, sep=",")
 
-# this start time is for 09:39:29 on 2013-05-26
+This start time is for 09:39:29 on 2013-05-26
 a <- as.POSIXct(start, origin="2013-05-26")
 start <- 9*60*60+39*60+29
 
-#by inspection, find the length of the good data. 
-#I can't think of a way around this.
+by inspection, find the length of the good data. 
+I can't think of a way around this.
 df <- df[1:6719,]
 
-##write files
+Write files
 write.zoo(engine, file="engine_run1.csv", sep=",")
 write.zoo(new_zoo, file="engine_run1_raw.csv", sep=",")
 
@@ -128,27 +129,27 @@ outputs raw drx raw data and an interpolated time series (zoo object).
 note: the user must enter the start and stop times of each run that appear in the drx data. 
 see below for an example.
 
-## Example R code 
-#setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1")
+Example R code 
+setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1")
 setwd("/home/will/R/Data/130602_L1")    
-#read in txt file
+Read in txt file
 df <- read.table("130602DRX.txt", skip=29, fill=T, sep=",")
 
-# here we set the start and stop indices for each run
+Here we set the start and stop indices for each run
 start1 <- 3368
 end1 <- 8724
-#start/stop rows for run2
+Start/stop rows for run2
 start2 <- 8753
 end2 <- 15090-5
 
-# this uses the fact that drx time stamps are correct. this is all kept the same.
+This uses the fact that drx time stamps are correct. this is all kept the same.
 time <- paste(df$V1,df$V2)
 time <- as.POSIXct(time, format="%m/%d/%Y%T")
 clean_data <- data.frame(time,df$V3,df$V4,df$V5,df$V6,df$V7)
 colnames(clean_data)<- c("time","pm1","pm2.5","resp","pm10","total")
 
-#and see if you're close
-#if not start with different values for start1/end1
+and see if you're close
+if not start with different values for start1/end1
 head(drx_run1);tail(drx_run1)
 
 Chapter 3 - All Other Sensors
@@ -159,14 +160,14 @@ all_sensors.r
 takes filenames, start time and date for GPS.
 outputs combined raw data and an interpolated time series (zoo objects) for each sensor. 
 
-## Example R code 
-#set working directory for drx and read in file
+Example R code 
+Set working directory for drx and read in file
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130602_L1")
 drx_input <- read.csv(file="drx_run1.csv")
 
-# directory for all the other sensors
+Directory for all the other sensors
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130602_L1/130602_CATL1_Run1")
-# all the other sensors files
+All the other sensors files
 co2bg_input <- read.table("20130602092645_CO2_BG.txt", skip=2, fill=T, sep=",")
 co2dil_input <- read.table("20130602092645_CO2_Dil.txt", skip=2, fill=T, sep=",")
 co2tpi_input <- read.table("20130602092645_CO2_TPi.txt", skip=2, fill=T, sep=",")
@@ -175,7 +176,7 @@ hnu_input <- read.table("20130602092645_HNU.txt", skip=1, sep=",")
 gps_input <- read.table("20130602092645_GPS.txt",skip=1,fill=T)
 testo_input <- read.table("20130602092645_Testo350.txt", skip=2, sep=",")
 
-# need gps_start time manually entered this is for 09:26:47 2013-06-02
+Need gps_start time manually entered this is for 09:26:47 2013-06-02
 start_gps <- as.POSIXct(9*60*60+26*60+47, origin="2013-06-02")
 
 Chapter 4 - Cross Correlation Function
@@ -184,13 +185,13 @@ read_in.r
 takes in all zoo objects made by the other scripts.
 outputs aligned zoo object.
 
-## Example R code 
-# change these files names for DRX data
+Example R code 
+Change these files names for DRX data
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1")
-#setwd("/home/will/R/Data/130527_C1")
+setwd("/home/will/R/Data/130527_C1")
 drx <- read.zoo("drx_run1_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 
-#change wd and file name for sensor data
+Change wd and file name for sensor data
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1/130527_CATC1_Run1")
 co2bg <- read.zoo("co2bg_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 co2dil <- read.zoo("co2dil_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
@@ -200,38 +201,40 @@ hnu <- read.zoo("hnu_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 gps <- read.zoo("gps_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 testo <- read.zoo("testo_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 
-#change wd and filename for engine data
+Change wd and filename for engine data
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1/EngineData")
 engine <- read.zoo("run1_engine_r.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 engine <- na.omit(engine)
 
-# analysis starts here  
-# cutting up the data to a known engine idle time
+Cnalysis starts here  
+Cutting up the data to a known engine idle time
 stop <- nrow(engine)
 start <- stop-(900)
 
-#cutting up engine zoo object
+Cutting up engine zoo object
 engine_part <- engine[start:stop]
 summary(engine_part$rpm)
 plot.zoo(engine_part$rpm)
 dev.new()
 plot.zoo(engine$rpm)
 
-#cutting up HNU zoo object
+Cutting up HNU zoo object
 hnu_part <- hnu[start:stop]
 summary(hnu_part)
 plot.zoo(hnu_part)
 dev.new()
 plot.zoo(hnu)
 
-#cutting up CPC zoo object
+Cutting up CPC zoo object
 cpc_part <- cpc[start:stop]
 summary(cpc)
 plot.zoo(cpc)
 dev.new()
 plot.zoo(cpc_part)
 
-# using the max.ccf function to find the maximum cross correlation between these zoo objects.
+Using the max.ccf function to find the maximum cross correlation between these zoo objects.
 max.ccf(cpc_part,hnu_part,700)$lag
 max.ccf(cpc_part,engine_part$rpm,700)$lag
 max.ccf(hnu_part,engine_part$rpm,700)$lag
+
+The lag is found then appled to the time series. Congrats! You're done!
