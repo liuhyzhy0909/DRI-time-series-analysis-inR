@@ -8,14 +8,14 @@ User guide for heavy hauler emissions project using R code for TS analysis
 by Will Rudebusch 
 updated March 2014
 
-Table of Contents ______________________________________________ page 1
-Chapter 1 - Engine Data _________________________________________ page 1
-Section A - Caterpillar Engine Data _________________________ page 1
-Section B - Liebherr Engine  Data ___________________________ page 2
-Section C - Komatsu Engine Data ___________________________ page 3
-Chapter 2 - DRX Data ___________________________________________ page 4
-Chapter 3 - All Other Sensors ____________________________________ page 5
-Chapter 4 - Cross Correlation Function ____________________________ page 6
+Table of Contents 
+Chapter 1 - Engine Data
+Section A - Caterpillar Engine Data 
+Section B - Liebherr Engine  Data
+Section C - Komatsu Engine Data
+Chapter 2 - DRX Data 
+Chapter 3 - All Other Sensors 
+Chapter 4 - Cross Correlation Function 
 
 Zoo documation: http://cran.r-project.org/web/packages/zoo/vignettes/zoo-quickref.pdf
 
@@ -36,7 +36,7 @@ The overall thrust of this approach is to do the following process with each dat
 Most scripts are separate for debugging purposes. This is typically based on sensor type. 
 for example 130528_C2 has drx, langan, engine, all (bgco2, testo, etc) and lag.
 
-# denotes a commented line in R
+'#' denotes a commented line in R
 
 Chapter 1 - Engine Data
 We are given there are three types of engine data. Hence, three different scripts were written.
@@ -48,19 +48,19 @@ takes arguments engine data files and start times.
 outputs raw engine data data and an interpolated time series (zoo objects). 
 note: this code handles both the wireless data and the remote data and attempts to combine the two at the end (based on timestamps)
 
-## Example R code 1-A
-#set the working directory to where the engine data csv file lives.
+Example R code 1-A
+Set the working directory to where the engine data csv file lives.
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1/EngineData")
 
-# read in the csv file, you have to change this every time, don't worry about the other stuff. 
+Read in the csv file, you have to change this every time, don't worry about the other stuff. 
 df <- read.table("C1vimsCDL153-253_LAJ00314.csv", skip=2, fill=T, stringsAsFactors=F, sep=",")
 
-# this start time is for 13:53:48
+This start time is for 13:53:48
 start <- 13*60*60+53*60+48
-# this makes the date 2013-05-27
+This makes the date 2013-05-27
 a <- as.POSIXct(start, origin="2013-05-27")
 
-#the remote data is 4HZ so this had to be converted. using the line
+The remote data is 4HZ so this had to be converted. using the line
 c <- as.integer(nrow(df)/4)*4
 
 Chapter 1 - Section B - Liebherr Engine Data
@@ -71,26 +71,26 @@ outputs raw engine data data and an interpolated time series (zoo object).
 note: the user must enter the start and stop times of each run that is in the engine data. 
 see below for an example.
 
-## Example R code 1-B
-#set the working directory to where the engine data csv file lives.
+Example R code 1-B
+Set the working directory to where the engine data csv file lives.
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130602_L1")
 
-# read in the csv file, you have to change this every time, don't worry about the other stuff. 
+Read in the csv file, you have to change this every time, don't worry about the other stuff. 
 df <- read.table("L1-Liebherr_June2_emission.csv", skip=2, fill=T, stringsAsFactors=F, sep=",")
 
-# this start time is for 09:21:37 on 2013-06-02
+This start time is for 09:21:37 on 2013-06-02
 a <- as.POSIXct(start, origin="2013-06-02")
 start <- 9*60*60+21*60+37
 
-# making our start/stop times for each run
+Taking our start/stop times for each run
 run1_start <- 0
 run1_stop <- (11*60*60+0*60)-start
-# run 1 starts at 09:21:37 (time zero) and ends at 11:00:00
+Run 1 starts at 09:21:37 (time zero) and ends at 11:00:00
 run1 <- engine[run1_start:run1_stop]
-# now to run 2
+Now to run 2
 run2_start <- run1_stop+1
 run2_stop <- nrow(df)
-# run 2 starts at run1 plus one second and stops at the end of the data
+Run 2 starts at run1 plus one second and stops at the end of the data
 run2 <- engine[run2_start:run2_stop]
 
 Chapter 1 - Section C - Komatsu engine data
