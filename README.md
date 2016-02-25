@@ -1,4 +1,6 @@
-time series interpolation and cross correlation analysis
+Time series interpolation and cross correlation analysis
+
+The Raw data can be found in https://github.com/wrudebusch/DRI-HeavyHaulers.git
 
 User guide for heavy hauler emissions project using R code for TS analysis by Will Rudebusch R code finished March 2014 readme edited Feb 2016
 
