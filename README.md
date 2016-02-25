@@ -204,13 +204,20 @@ Example R code
 Change these files names for DRX data 
 ```r
 setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1") 
-#setwd("/home/will/R/Data/130527_C1") 
+setwd("/home/will/R/Data/130527_C1") 
 drx <- read.zoo("drx_run1_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",")
 ```
 
 Change wd and file name for sensor data 
 ```r
-setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1/130527_CATC1_Run1") co2bg <- read.zoo("co2bg_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") co2dil <- read.zoo("co2dil_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") co2tpi <- read.zoo("co2tpi_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") cpc <- read.zoo("cpc_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") hnu <- read.zoo("hnu_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") gps <- read.zoo("gps_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") testo <- read.zoo("testo_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+setwd("C:/Users/asus/Desktop/heavy_hauler/Data/130527_C1/130527_CATC1_Run1") 
+co2bg <- read.zoo("co2bg_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+co2dil <- read.zoo("co2dil_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+co2tpi <- read.zoo("co2tpi_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+cpc <- read.zoo("cpc_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+hnu <- read.zoo("hnu_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+gps <- read.zoo("gps_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
+testo <- read.zoo("testo_z.csv",header=T,tz="",format="%Y-%m-%d %H:%M:%S", sep=",") 
 ```
 
 Change wd and filename for engine data 
